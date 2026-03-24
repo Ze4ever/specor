@@ -1,0 +1,17 @@
+# Runtime data
+/data/*.sqlite
+/data/*.sqlite3
+/data/*.db
+/data/*.json
+/data/*.bak
+/data/*.tmp
+
+# Node
+/node_modules/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
