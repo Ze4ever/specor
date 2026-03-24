@@ -1,0 +1,2 @@
+# specor
+Crypto Portfolio Control
