@@ -1,131 +1,131 @@
 # SPECOR
 
-SPECOR e uma suite local em PHP + SQLite para controlo de portfolio cripto. Inclui apps separadas para Uniswap, Solana e NEXO, mais um dashboard global. O registo e feito pelo utilizador, sem wallet connect e sem leitura on-chain, com KPIs, historicos e atalhos operacionais.
+SPECOR is a local PHP + SQLite suite to manage a crypto portfolio. It ships with separate apps for Uniswap, Solana, and NEXO, plus a global dashboard that consolidates everything. No wallet connect and no on-chain reads are required.
 
-## Porque usar
-- Tudo corre localmente e os dados ficam em `data/app.sqlite`.
-- Separacao clara por aplicacao (Uniswap, Solana, NEXO) e visao consolidada.
-- Operacoes diretas: criar pools, registar fees, compor, fechar pools, staking, termos NEXO.
-- Precos via Coingecko quando disponivel, com modo de preco definido pelo utilizador.
+## Why use SPECOR
+- Runs fully local and stores data in `data/app.sqlite`.
+- Clear separation per app (Uniswap, Solana, NEXO) with a global view.
+- Direct operations: create pools, log fees, compound, close pools, staking, NEXO terms.
+- Prices from Coingecko when available, with user-defined overrides.
 
-## Como correr (local)
-1. Inicia o servidor:
+## Run locally
+1. Start the server:
    ```bash
    php -S localhost:8000 -t public
    ```
-2. Abre `http://localhost:8000/index.php`.
-3. Login inicial (se ainda nao houver utilizadores): `admin / admin123`.
+2. Open `http://localhost:8000/index.php`.
+3. Initial login (only if no users exist yet): `admin / admin123`.
 
-## Configuracao inicial
-- `APP_DEFAULT_USER` e `APP_DEFAULT_PASS` definem o utilizador inicial (so na primeira execucao).
-- Timezone default: `Europe/Lisbon` (em `app/common/config/bootstrap.php`).
-- Precisas de PHP 8+ com `pdo_sqlite` ativo e permissao de escrita em `data/`.
+## Initial setup
+- `APP_DEFAULT_USER` and `APP_DEFAULT_PASS` define the initial user (first run only).
+- Default timezone: `Europe/Lisbon` in `app/common/config/bootstrap.php`.
+- Requires PHP 8+ with `pdo_sqlite` enabled and write permissions to `data/`.
 
-## Aplicacoes
+## Applications
 
 ### Global Dashboard
-O que faz:
-- Consolida Uniswap + NEXO num unico painel com KPIs e atividade recente.
+What it does:
+- Consolidates Uniswap + NEXO into a single view with KPIs and recent activity.
 
-Como funciona:
-- Agrega dados das apps e mostra top pools, transacoes recentes e rewards recentes.
+How it works:
+- Aggregates pool data and NEXO wallet data into a unified snapshot.
 
-Como usar:
-- Abre `index.php` e usa os atalhos para saltar para Uniswap ou NEXO.
+How to use:
+- Open `index.php` and use the shortcuts to jump into the specific apps.
 
-Calcula:
+Calculations:
 - Total portfolio (Uniswap + NEXO).
-- ROI, APR ponderado, fees 7d e rewards 30d.
-- Snapshot de saude (pools com ROI positivo, yield > 1).
+- ROI, weighted APR, fees (7d) and rewards (30d).
+- Health snapshot (positive ROI pools, yield > 1).
 
-Vantagens:
-- Visao rapida do portfolio sem abrir cada app.
-- Links diretos para operacoes mais frequentes.
+Advantages:
+- Fast overview without opening each app.
+- Direct links to the most used actions.
 
 ### Uniswap App
-O que faz:
-- Garante controlo completo de pools Uniswap com transacoes, fees, precos e encerramento de pools.
+What it does:
+- Full pool control: transactions, fees, prices, and pool closing.
 
-Como funciona:
-- Usa tabelas locais para pools, transacoes, fee snapshots, targets e closed pools.
+How it works:
+- Local tables for pools, transactions, fee snapshots, targets, and closed pools.
 
-Como usar (fluxo recomendado):
-1. `Market`: adiciona tokens e precos (Coingecko ou preco definido pelo utilizador).
-2. `Create Pool`: cria um pool base (wallet, chain, assets).
-3. `Transactions`: regista `create`, `compound`, `remove`, `fees` (ou importa JSON).
-4. `Pools`: ajusta quantidades atuais, reordena pools e executa quick actions.
-5. `Fees`: regista snapshots diarios de unclaimed e marca claims.
-6. `Closed Pools`: fecha pools quando terminares a posicao.
+How to use (recommended flow):
+1. `Market`: add tokens and prices (Coingecko or user-defined).
+2. `Create Pool`: create the base pool (wallet, chain, assets).
+3. `Transactions`: log `create`, `compound`, `remove`, `fees` (or import JSON).
+4. `Pools`: adjust current amounts, reorder pools, use quick actions.
+5. `Fees`: add daily unclaimed snapshots and mark claims.
+6. `Closed Pools`: close a pool when the position ends.
 
-Calcula:
+Calculations:
 - Deposits, totals, ROI, APR, P/day, HODL, fees claimed/unclaimed.
-- Historico diario de fees (unclaimed + claimed).
+- Daily fees history (unclaimed + claimed).
 
-Vantagens:
-- Registo completo de performance por pool.
-- Comparacao direta com HODL.
-- Operacoes rapidas de compound/close.
+Advantages:
+- Complete performance tracking per pool.
+- Direct comparison vs HODL.
+- Fast compound/close operations.
 
 ### Solana App
-O que faz:
-- Replica o fluxo de pools/fees/transactions para Solana, com modulo de staking integrado.
+What it does:
+- Mirrors the pool/fees/transactions flow for Solana, plus staking.
 
-Como funciona:
-- Mesma logica de pools da app Uniswap, mas com tabelas dedicadas a Solana.
+How it works:
+- Same logic as Uniswap with Solana-specific tables.
 
-Como usar (fluxo recomendado):
-1. `Market`, `Create Pool`, `Transactions`, `Pools`, `Fees`, `Closed Pools` seguem o mesmo fluxo da Uniswap.
-2. `Staking`: adiciona posicoes, acompanha APY, rewards e fecha stakes.
+How to use (recommended flow):
+1. `Market`, `Create Pool`, `Transactions`, `Pools`, `Fees`, `Closed Pools` follow the same flow as Uniswap.
+2. `Staking`: add positions, track APY, rewards, and close stakes.
 
-Calcula:
-- Mesmas metricas de pools da Uniswap.
-- KPIs de staking (ativos, rewards, APY, valores USD).
+Calculations:
+- Same pool metrics as Uniswap.
+- Staking KPIs (active count, rewards, APY, USD totals).
 
-Vantagens:
-- Separacao clara entre liquidez e staking.
-- Historico completo por stake com estado active/closed.
+Advantages:
+- Clear separation between liquidity and staking.
+- Full history per stake with active/closed status.
 
 ### NEXO Wallet App
-O que faz:
-- Controla wallet NEXO com termos flexible/fixed, precos de mercado e transacoes internas.
+What it does:
+- Tracks the NEXO wallet with flexible/fixed terms, market prices, and internal transactions.
 
-Como funciona:
-- Guarda termos, rewards diarios, precos e transacoes por bucket (wallet/flexible/fixed).
+How it works:
+- Stores terms, daily rewards, market prices, and transactions by bucket (wallet/flexible/fixed).
 
-Como usar (fluxo recomendado):
-1. `Market`: define tokens e Coingecko IDs, ou preco definido pelo utilizador.
-2. `Flexible`: cria termos, gera logs diarios e finaliza quando fechar.
-3. `Fixed`: cria termos fixos, regista rewards diarios e fecha quando termina.
-4. `Transactions`: regista movimentos de wallet e termos (add/remove/adjust/finalize).
+How to use (recommended flow):
+1. `Market`: define tokens and Coingecko IDs, or set a user-defined price.
+2. `Flexible`: create terms, generate daily logs, finalize when closed.
+3. `Fixed`: create fixed terms, record daily rewards, close at the end.
+4. `Transactions`: log wallet and term movements (add/remove/adjust/finalize).
 
-Calcula:
-- Total da wallet (EURX + NEXO), conversoes USD, rewards em USD e NEXO.
-- APY medio ponderado, total diario e totais historicos.
-- Logs diarios gerados a 00:00 UTC.
+Calculations:
+- Wallet total (EURX + NEXO), USD conversions, rewards in USD and NEXO.
+- Weighted APY, daily pace, and historical totals.
+- Daily logs generated at 00:00 UTC.
 
-Vantagens:
-- Visao consolidada da carteira NEXO.
-- Historico detalhado de rewards por termo e por dia.
+Advantages:
+- Consolidated view of the NEXO wallet.
+- Detailed rewards history per term and per day.
 
-## Importacao e exportacao
-- Import JSON na tab `Transactions` de Uniswap ou Solana.
-- Import automatico se existir `data/excel_import.json`.
-- Export JSON completo por utilizador.
-- Export CSV de transacoes e asset prices.
+## Import and export
+- Import JSON in the `Transactions` tab of Uniswap or Solana.
+- Auto import if `data/excel_import.json` exists.
+- Export full JSON backup per user.
+- Export CSV for transactions and asset prices.
 
-Chaves esperadas no JSON:
+Expected JSON keys:
 - `asset_prices`, `dados_uniswap`, `pool_overrides`, `pool_order`, `token_targets`, `fee_snapshots`, `closed_pools`.
 
-## Seguranca e dados
-- Login/registo com passwords em hash.
-- CSRF ativo em todos os POSTs.
-- Dados isolados por utilizador em SQLite.
+## Security and data
+- Login/registration with hashed passwords.
+- CSRF enabled for all POST actions.
+- User-isolated data in SQLite.
 
-## Estrutura do projeto
-- `public/` entrada web e assets.
-- `app/common/` autenticacao, helpers e dashboard global.
-- `app/uniswap/`, `app/solana/`, `app/nexo/` apps especificas.
-- `data/` base SQLite e ficheiros de import.
+## Project structure
+- `public/` web entry and assets.
+- `app/common/` auth, helpers, and global dashboard.
+- `app/uniswap/`, `app/solana/`, `app/nexo/` app modules.
+- `data/` SQLite database and import files.
 
-## Licenca
-Este projeto e proprietario. Ver `LICENSE`.
+## License
+This project is proprietary. See `LICENSE`.
